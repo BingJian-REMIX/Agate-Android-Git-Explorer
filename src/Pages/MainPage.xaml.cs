@@ -213,7 +213,16 @@ public partial class MainPage : ContentPage
             _pendingPhoneStorage = false;
         }
 
-        if (_root.Length > 0) return;
+        if (_root.Length > 0)
+        {
+            // 从子页面返回：若仍停留在多选态，退出并刷新，让批量重命名/分割合并的改动立刻反映。
+            if (IsSelectionMode)
+            {
+                ExitSelection();
+                await LoadAsync();
+            }
+            return;
+        }
 
         IsLoading = true;
         try
@@ -1030,6 +1039,39 @@ public partial class MainPage : ContentPage
 
         ExitSelection();
         await LoadAsync();
+    }
+
+    /// <summary>多选后批量重命名：序号模板 / 正则替换，先预览再执行。</summary>
+    private async void OnBatchRenameTapped(object? sender, EventArgs e)
+    {
+        var selected = SelectedItems;
+        if (selected.Count == 0) return;
+
+        // .git 是系统目录，不参与批量改名（避免破坏仓库）
+        var items = selected.Where(i => i.Name != ".git").ToList();
+        if (items.Count == 0)
+        {
+            await this.SafeAlertAsync("不可重命名", "选中的项不可改名。", "好");
+            return;
+        }
+
+        await Navigation.PushAsync(new BatchRenamePage(items));
+    }
+
+    /// <summary>文件分割 / 分片合并入口。</summary>
+    private async void OnSplitMergeTapped(object? sender, EventArgs e)
+    {
+        var selected = SelectedItems;
+        if (selected.Count == 0) return;
+
+        var files = selected.Where(i => !i.IsDirectory).ToList();
+        if (files.Count == 0)
+        {
+            await this.SafeAlertAsync("需要文件", "分割/合并只支持文件，请选择文件而非目录。", "好");
+            return;
+        }
+
+        await Navigation.PushAsync(new FileSplitPage(files));
     }
 
     private async void OnPasteTapped(object? sender, EventArgs e)

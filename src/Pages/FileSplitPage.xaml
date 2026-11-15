@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Pebble.FileSplitPage"
+             Title="分割与合并"
+             BackgroundColor="{AppThemeBinding Light=#F7F8FC, Dark=#07090F}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16,12,16,28" Spacing="18">
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="操作" FontSize="13" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
+                <Picker x:Name="ModePicker" SelectedIndexChanged="OnModeChanged"
+                        TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}">
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>分割文件</x:String>
+                            <x:String>合并分片</x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
+                <Label x:Name="ModeHintLabel" FontSize="11"
+                       TextColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}" />
+            </VerticalStackLayout>
+
+            <!-- 分割面板 -->
+            <VerticalStackLayout x:Name="SplitSection" Spacing="14">
+                <Border BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#10131C}"
+                        Stroke="{AppThemeBinding Light=#DCE1EC, Dark=#1E2434}" StrokeThickness="1" Padding="14,10">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
+                    <VerticalStackLayout Spacing="3">
+                        <Label x:Name="SplitFileLabel" FontSize="13" FontAttributes="Bold"
+                               LineBreakMode="MiddleTruncation"
+                               TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
+                        <Label x:Name="SplitSizeLabel" FontSize="11"
+                               TextColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="分割依据" FontSize="12"
+                           TextColor="{AppThemeBinding Light=#5A6172, Dark=#8B93A7}" />
+                    <Picker x:Name="SplitBasisPicker" SelectedIndex="0"
+                            TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}">
+                        <Picker.ItemsSource>
+                            <x:Array Type="{x:Type x:String}">
+                                <x:String>按大小（MB）</x:String>
+                                <x:String>按行数</x:String>
+                            </x:Array>
+                        </Picker.ItemsSource>
+                    </Picker>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label x:Name="ThresholdLabel" Text="每片大小（MB）" FontSize="12"
+                           TextColor="{AppThemeBinding Light=#5A6172, Dark=#8B93A7}" />
+                    <Border BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#10131C}"
+                            Stroke="{AppThemeBinding Light=#DCE1EC, Dark=#1E2434}" StrokeThickness="1" Padding="12,0">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
+                        <Entry x:Name="ThresholdEntry" Text="100" Keyboard="Numeric"
+                               TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}"
+                               BackgroundColor="Transparent" HeightRequest="46" />
+                    </Border>
+                    <Label x:Name="EstimateLabel" FontSize="11"
+                           TextColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}" />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- 合并面板 -->
+            <VerticalStackLayout x:Name="MergeSection" IsVisible="False" Spacing="14">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="待合并分片（按序号）" FontSize="12"
+                           TextColor="{AppThemeBinding Light=#5A6172, Dark=#8B93A7}" />
+                    <Label x:Name="MergeCountLabel" FontSize="11"
+                           TextColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}" />
+                </VerticalStackLayout>
+
+                <!-- 用 BindableLayout 而非 CollectionView：它嵌在 ScrollView 里，
+                     CollectionView 的虚拟化测量会与外层滚动打架。 -->
+                <VerticalStackLayout x:Name="PartsList" Spacing="2">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Label Text="{Binding Name}" FontSize="12" Padding="14,6"
+                                   LineBreakMode="MiddleTruncation"
+                                   TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="输出文件名" FontSize="12"
+                           TextColor="{AppThemeBinding Light=#5A6172, Dark=#8B93A7}" />
+                    <Border BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#10131C}"
+                            Stroke="{AppThemeBinding Light=#DCE1EC, Dark=#1E2434}" StrokeThickness="1" Padding="12,0">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
+                        <Entry x:Name="OutputEntry"
+                               TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}"
+                               BackgroundColor="Transparent" HeightRequest="46" />
+                    </Border>
+                    <Label x:Name="OutputHintLabel" FontSize="11"
+                           TextColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}" />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <Label x:Name="StatusLabel" FontSize="12" IsVisible="False"
+                   TextColor="{AppThemeBinding Light=#C0392B, Dark=#FF7A6B}" />
+            <Button x:Name="RunButton" Text="执行" Clicked="OnRunClicked"
+                    Style="{StaticResource CtxButton}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

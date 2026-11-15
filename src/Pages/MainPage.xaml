@@ -164,6 +164,12 @@
                             IsVisible="{Binding IsGitRepo}" />
                     <Button Grid.Column="1" Text="解压 zip" Clicked="OnExtractTapped" Style="{StaticResource CtxButton}" />
                 </Grid>
+
+                <!-- 第三行：批量重命名 + 分割/合并 -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+                    <Button Grid.Column="0" Text="批量重命名" Clicked="OnBatchRenameTapped" Style="{StaticResource CtxButton}" />
+                    <Button Grid.Column="1" Text="分割 / 合并" Clicked="OnSplitMergeTapped" Style="{StaticResource CtxButton}" />
+                </Grid>
             </VerticalStackLayout>
 
             <!-- ==================== 文件列表 + FAB ==================== -->
