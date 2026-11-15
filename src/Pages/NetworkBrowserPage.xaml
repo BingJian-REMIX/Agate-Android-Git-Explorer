@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Pebble.NetworkBrowserPage"
+             BackgroundColor="{AppThemeBinding Light=#F7F8FC, Dark=#07090F}">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- 顶部：返回上级 / 当前路径 / 上传 / 新建 -->
+        <Grid Grid.Row="0" ColumnDefinitions="44,*,Auto,Auto"
+              Padding="6,8,10,8"
+              BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#10131C}">
+            <Image Grid.Column="0" Source="{AppThemeBinding Light=arrow_left_light, Dark=arrow_left}"
+                   WidthRequest="22" HeightRequest="22" VerticalOptions="Center" HorizontalOptions="Center">
+                <Image.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnUpTapped" />
+                </Image.GestureRecognizers>
+            </Image>
+
+            <Label Grid.Column="1" x:Name="PathLabel"
+                   Text="/" FontSize="13" VerticalOptions="Center"
+                   LineBreakMode="HeadTruncation"
+                   TextColor="{AppThemeBinding Light=#5F6779, Dark=#8B94A8}" />
+
+            <Label Grid.Column="2" Text="上传" FontSize="13" VerticalOptions="Center"
+                   Margin="8,0" TextColor="{AppThemeBinding Light=#7C5CFF, Dark=#9B86FF}">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnUploadTapped" />
+                </Label.GestureRecognizers>
+            </Label>
+
+            <Label Grid.Column="3" Text="新建" FontSize="13" VerticalOptions="Center"
+                   TextColor="{AppThemeBinding Light=#7C5CFF, Dark=#9B86FF}">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnNewFolderTapped" />
+                </Label.GestureRecognizers>
+            </Label>
+        </Grid>
+
+        <!-- 远端目录列表（与本地文件浏览器一致的行模板） -->
+        <CollectionView x:Name="RemoteList" Grid.Row="1"
+                        SelectionMode="None"
+                        ItemsSource="{Binding Items}"
+                        BackgroundColor="Transparent">
+            <CollectionView.EmptyView>
+                <Label Text="（空目录或读取失败）"
+                       HorizontalOptions="Center" Margin="0,40,0,0"
+                       TextColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="16,11,16,11" ColumnDefinitions="28,*,Auto">
+                        <Image Grid.Column="0"
+                               Source="{AppThemeBinding Light=folder_light, Dark=folder}"
+                               WidthRequest="20" HeightRequest="20" VerticalOptions="Center">
+                            <Image.Triggers>
+                                <DataTrigger TargetType="Image" Binding="{Binding IsDirectory}" Value="False">
+                                    <Setter Property="Source" Value="{AppThemeBinding Light=file_light, Dark=file}" />
+                                </DataTrigger>
+                            </Image.Triggers>
+                        </Image>
+                        <Label Grid.Column="1" FontSize="14" VerticalOptions="Center"
+                               LineBreakMode="MiddleTruncation"
+                               Text="{Binding Name}"
+                               TextColor="{AppThemeBinding Light=#1F2430, Dark=#E6E9F2}" />
+                        <Label Grid.Column="2" FontSize="12" VerticalOptions="Center"
+                               HorizontalOptions="End"
+                               Text="{Binding SizeText}"
+                               TextColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}" />
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnItemTapped" CommandParameter="{Binding .}" />
+                        </Grid.GestureRecognizers>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- 加载指示 -->
+        <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                           Color="{AppThemeBinding Light=#7C5CFF, Dark=#9B86FF}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+
+    </Grid>
+</ContentPage>

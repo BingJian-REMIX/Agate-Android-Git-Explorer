@@ -67,6 +67,15 @@
                 <Button Text="保存端口" Clicked="OnSavePortClicked" Style="{StaticResource CtxButton}" />
             </VerticalStackLayout>
 
+            <!-- 网络存储 -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="网络存储" FontSize="13" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
+                <Label Text="添加 WebDAV / SMB 远程存储，在「浏览位置」里直接挂载访问、上传下载。"
+                       FontSize="11" TextColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}" />
+                <Button Text="管理网络存储" Clicked="OnNetworkStorageClicked" Style="{StaticResource CtxButton}" />
+            </VerticalStackLayout>
+
             <!-- 清理回收站 -->
             <VerticalStackLayout Spacing="8">
                 <Label Text="清理回收站" FontSize="13" FontAttributes="Bold"

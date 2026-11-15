@@ -3,9 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
              x:Class="Pebble.ArchivePreviewPage"
+             x:Name="ThisPage"
              BackgroundColor="{AppThemeBinding Light=#F7F8FC, Dark=#07090F}">
 
-    <Grid RowDefinitions="Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
 
         <!-- 顶部导航栏：返回 + 当前路径面包屑 -->
         <Grid Grid.Row="0"
@@ -54,8 +55,7 @@
         <!-- 归档内条目列表（仅列举，不解压） -->
         <CollectionView x:Name="EntryList"
                         Grid.Row="2"
-                        SelectionMode="Single"
-                        SelectionChanged="OnEntrySelected"
+                        SelectionMode="None"
                         ItemsSource="{Binding Entries}"
                         BackgroundColor="Transparent">
             <CollectionView.EmptyView>
@@ -68,6 +68,15 @@
                 <DataTemplate>
                     <Grid Padding="16,11,16,11"
                           ColumnDefinitions="28,*,Auto">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnItemTapped" />
+                        </Grid.GestureRecognizers>
+                        <Grid.Behaviors>
+                            <toolkit:TouchBehavior
+                                LongPressCommand="{Binding Source={x:Reference ThisPage}, Path=LongPressCommand}"
+                                LongPressCommandParameter="{Binding .}"
+                                LongPressDuration="450" />
+                        </Grid.Behaviors>
                         <Image Grid.Column="0"
                                Source="{AppThemeBinding Light=folder_light, Dark=folder}"
                                WidthRequest="20" HeightRequest="20"
@@ -94,6 +103,24 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+
+        <!-- 底部：向当前压缩包目录塞入手机里的外部文件 -->
+        <Grid Grid.Row="3"
+              Padding="14,8,14,14"
+              ColumnDefinitions="*,Auto">
+            <Border StrokeThickness="0"
+                    BackgroundColor="{AppThemeBinding Light=#ECEFF6, Dark=#161B27}"
+                    HeightRequest="42">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
+                <Button Text="＋ 添加外部文件到压缩包"
+                        FontSize="13"
+                        BackgroundColor="Transparent"
+                        TextColor="{AppThemeBinding Light=#5B4BE0, Dark=#C4B5FD}"
+                        Clicked="OnAddExternalClicked" />
+            </Border>
+        </Grid>
 
         <!-- 读取中指示 -->
         <ActivityIndicator x:Name="Busy"

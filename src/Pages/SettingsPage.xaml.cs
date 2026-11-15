@@ -64,6 +64,11 @@ public partial class SettingsPage : ContentPage
         await this.SafeAlertAsync("已保存", $"服务器端口设为 {port}。", "好");
     }
 
+    private async void OnNetworkStorageClicked(object? sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new NetworkStoragePage());
+    }
+
     private async void OnClearTrashClicked(object? sender, EventArgs e)
     {
         var trash = Path.Combine(FileSystem.AppDataDirectory, ".trash");

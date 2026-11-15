@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Pebble.HexViewerPage"
+             BackgroundColor="{AppThemeBinding Light=#F7F8FC, Dark=#07090F}">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <!-- 行 0：标题 + 保存按钮 -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="*,Auto"
+              Padding="{OnPlatform Default='16,12,16,8', Android='16,40,16,8'}">
+            <Label x:Name="TitleLabel" FontSize="14" FontAttributes="Bold"
+                   LineBreakMode="MiddleTruncation"
+                   TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
+            <Button x:Name="SaveButton" Grid.Column="1" Text="保存"
+                    IsVisible="False" Clicked="OnSaveClicked"
+                    BackgroundColor="#22C55E" TextColor="#FFFFFF" />
+        </Grid>
+
+        <!-- 行 1：模式开关 + 十六进制序列搜索 -->
+        <Grid Grid.Row="1"
+              ColumnDefinitions="Auto,*,Auto,Auto"
+              Padding="12,4,12,8" ColumnSpacing="8">
+            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                <Switch x:Name="EditSwitch" Toggled="OnEditToggled" />
+                <Label x:Name="ModeLabel" Text="只读模式" VerticalOptions="Center"
+                       TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
+            </HorizontalStackLayout>
+            <Entry x:Name="SearchEntry" Grid.Column="1" Placeholder="搜索 50 4B"
+                   Keyboard="Plain" VerticalOptions="Center"
+                   TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}"
+                   PlaceholderColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}" />
+            <Button x:Name="SearchButton" Grid.Column="2" Text="查找" Clicked="OnSearchClicked" />
+            <Button x:Name="NextButton" Grid.Column="3" Text="下一个 ›" Clicked="OnNextMatch" />
+        </Grid>
+
+        <!-- 行 2：十六进制内容（WebView 渲染） -->
+        <WebView Grid.Row="2" x:Name="View"
+                 BackgroundColor="{AppThemeBinding Light=#F7F8FC, Dark=#07090F}" />
+    </Grid>
+</ContentPage>

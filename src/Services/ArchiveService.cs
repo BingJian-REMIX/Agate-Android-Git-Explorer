@@ -1,5 +1,8 @@
 using SharpCompress.Archives;
 using SharpCompress.Common;
+using SharpCompress.Writers;
+using SharpCompress.Writers.Zip;
+using System.Linq;
 
 namespace Pebble.Services;
 
@@ -192,5 +195,94 @@ public static class ArchiveService
         if (File.Exists(destination)) File.Delete(destination);
 
         found.WriteToFile(destination);
+    }
+
+    /// <summary>
+    /// 流式重写 ZIP（MT 管理器式“包内免解压修改”）：
+    /// 用 SharpCompress 读取原 Zip，逐条目流式写出到临时 Zip，过程中：
+    ///  · 命中 deleteKeys 的条目被跳过（目录按前缀匹配 = 删除整棵子树）；
+    ///  · 命中 renameMap 的条目改用新 key 写出（目录按前缀匹配 = 重命名整棵子树）；
+    ///  · addFiles 在末尾追加到指定目录。
+    /// 全程逐条目流式拷贝（reader.Open() → writer.Write()，内部 CopyTo 分块传输），
+    /// 不会把整个压缩包解到内存或磁盘，内存占用仅单条目一块缓冲。
+    /// 注意：ZipWriter 会按 Deflate 重新压缩，因此不保证与原字节一致，但归档内容不变。
+    /// 写完后用 File.Move 原子替换原文件（同卷 rename 即原子），临时文件在 finally 中清理。
+    /// </summary>
+    public static void RebuildZip(
+        string sourcePath,
+        IEnumerable<string>? deleteKeys = null,
+        IReadOnlyDictionary<string, string>? renameMap = null,
+        IEnumerable<(string EntryKey, string SourceFilePath)>? addFiles = null)
+    {
+        deleteKeys ??= Enumerable.Empty<string>();
+        renameMap ??= new Dictionary<string, string>();
+        addFiles ??= Enumerable.Empty<(string, string)>();
+
+        var deleteSet = new HashSet<string>(deleteKeys, StringComparer.Ordinal);
+
+        // 临时文件与原文件同目录（保证同卷，Move 才原子）
+        var tmp = Path.Combine(
+            Path.GetDirectoryName(sourcePath) ?? ".",
+            Path.GetFileName(sourcePath) + ".pebble-tmp-" + Guid.NewGuid().ToString("N").Substring(0, 8));
+
+        try
+        {
+            // 读：SharpCompress 的 ZipWriter 是只写流式写入器，“读”由 ArchiveFactory 完成。
+            // reader 必须包在显式 using 块里，确保 Move 之前已释放对原文件的句柄。
+            using (var reader = ArchiveFactory.Open(sourcePath))
+            using (var writer = new ZipWriter(File.Create(tmp), new ZipWriterOptions(CompressionType.Deflate) { LeaveStreamOpen = false }))
+            {
+                foreach (var entry in reader.Entries)
+                {
+                    if (entry.IsDirectory) continue;   // 目录由文件路径重建，无需单独写
+
+                    var key = NormalizeKey(entry.Key);
+                    if (string.IsNullOrEmpty(key))
+                        key = NormalizeKey(Path.GetFileNameWithoutExtension(sourcePath));
+
+                    if (IsDeleted(deleteSet, key)) continue;                 // 跳过被删条目
+                    var outKey = NormalizeKey(MapKey(renameMap, key));        // 改名条目换 key
+
+                    using var src = entry.OpenEntryStream();
+                    writer.Write(outKey, src, entry.LastModifiedTime);        // 流式拷贝单条目
+                }
+
+                // 追加外部文件（已拷到可随机读的路径）
+                foreach (var (entryKey, sourceFilePath) in addFiles)
+                {
+                    var addKey = NormalizeKey(entryKey);
+                    using var fs = File.OpenRead(sourceFilePath);
+                    writer.Write(addKey, fs, File.GetLastWriteTime(sourceFilePath));
+                }
+            }
+
+            // 全部写完后原子替换原文件（reader/writer 已释放句柄）
+            File.Move(tmp, sourcePath, overwrite: true);
+        }
+        finally
+        {
+            // 无论如何清理临时文件（正常路径已被 Move 移走，这里是失败兜底）
+            if (File.Exists(tmp)) File.Delete(tmp);
+        }
+    }
+
+    private static string NormalizeKey(string? key) => (key ?? string.Empty).Replace('\\', '/');
+
+    private static bool IsDeleted(HashSet<string> deleteSet, string key)
+    {
+        if (deleteSet.Contains(key)) return true;
+        foreach (var d in deleteSet)
+            if (d.EndsWith('/') && key.StartsWith(d, StringComparison.Ordinal)) return true;
+        return false;
+    }
+
+    private static string MapKey(IReadOnlyDictionary<string, string> renameMap, string key)
+    {
+        if (renameMap.TryGetValue(key, out var rk)) return rk;
+        // 目录重命名：整棵子树前缀替换
+        foreach (var kv in renameMap)
+            if (kv.Key.EndsWith('/') && key.StartsWith(kv.Key, StringComparison.Ordinal))
+                return kv.Value + key.Substring(kv.Key.Length);
+        return key;
     }
 }

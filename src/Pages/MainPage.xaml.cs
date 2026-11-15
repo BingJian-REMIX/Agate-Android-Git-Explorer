@@ -614,6 +614,7 @@ public partial class MainPage : ContentPage
         }
 
         // 通用项：始终提供系统打开；未知类型至少能系统打开。
+        options.Add("十六进制查看");
         options.Add("系统打开");
 
         var action = await DisplayActionSheetAsync(item.Name, "取消", null, options.ToArray());
@@ -621,6 +622,7 @@ public partial class MainPage : ContentPage
 
         switch (action)
         {
+            case "十六进制查看": await OpenHexAsync(item); break;
             case "编辑（源码）": await OpenEditorAsync(item); break;
             case "Markdown 预览": await OpenMarkdownPreviewAsync(item); break;
             case "预览图片": await OpenImagePreviewAsync(item); break;
@@ -735,6 +737,19 @@ public partial class MainPage : ContentPage
         var editor = new EditorPage(item);
         editor.Disappearing += async (_, _) => await LoadAsync();
         await Navigation.PushAsync(editor);
+    }
+
+    /// <summary>十六进制查看：仅支持 ≤ 1 MB 的文件（避免 WebView 按字节铺 span 导致 HTML 爆炸）。</summary>
+    private async Task OpenHexAsync(FileItem item)
+    {
+        var fi = new FileInfo(item.FullPath);
+        if (fi.Exists && fi.Length > 1L * 1024 * 1024)
+        {
+            await this.SafeAlertAsync("文件过大", "Hex 编辑器仅支持 ≤ 1 MB 的文件。", "好");
+            return;
+        }
+
+        await Navigation.PushAsync(new HexViewerPage(item));
     }
 
     // ------------------------------------------------------------ 本地静态服务器
@@ -1275,6 +1290,10 @@ public partial class MainPage : ContentPage
         options.Add("书签…");
         options.Add("设置…");
 
+        // 网络存储连接逐个作为入口出现在「浏览位置」里；再加一个管理入口
+        foreach (var c in NetworkStore.Connections) options.Add(c.Name);
+        if (NetworkStore.Connections.Count > 0) options.Add("网络存储管理…");
+
         var action = await DisplayActionSheetAsync("浏览位置", "取消", null, options.ToArray());
 
         switch (action)
@@ -1296,6 +1315,17 @@ public partial class MainPage : ContentPage
                 await Navigation.PushAsync(new SettingsPage());
                 break;
         }
+
+        if (action == "网络存储管理…")
+        {
+            await Navigation.PushAsync(new NetworkStoragePage());
+            return;
+        }
+
+        // 点中的是某个网络存储连接 → 直接浏览远端目录
+        var conn = NetworkStore.Connections.FirstOrDefault(c => c.Name == action);
+        if (conn is not null)
+            await Navigation.PushAsync(new NetworkBrowserPage(conn));
     }
 
     private async Task ShowBookmarksAsync()
