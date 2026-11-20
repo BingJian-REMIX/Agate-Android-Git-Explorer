@@ -347,6 +347,17 @@ public sealed class GitService
         catch { return false; }
     }
 
+    /// <summary>在指定目录初始化一个新的 Git 仓库（已存在则拒绝，避免覆盖原有 .git）。</summary>
+    public static void InitRepository(string path)
+    {
+        if (!Directory.Exists(path))
+            throw new DirectoryNotFoundException($"目录不存在：{path}");
+        if (IsRepository(path))
+            throw new InvalidOperationException("该目录已经是 Git 仓库");
+
+        Repository.Init(path);
+    }
+
     /// <summary>
     /// 从给定路径向上逐层查找 .git，返回仓库根；找不到返回 null。
     /// 用于「在手机存储的某个子目录里也能识别出它属于某个 Git 仓库」。

@@ -45,14 +45,6 @@ public partial class MainPage : ContentPage
         InitializeComponent();
         RefreshCommand = new Command(async () => await LoadAsync());
         BindingContext = this;
-        if (Application.Current is not null)
-            Application.Current.RequestedThemeChanged += OnRequestedThemeChanged;
-    }
-
-    private void OnRequestedThemeChanged(object? sender, AppThemeChangedEventArgs e)
-    {
-        OnPropertyChanged(nameof(WifiIconSource));
-        OnPropertyChanged(nameof(BrowseIconSource));
     }
 
     // ------------------------------------------------------------- 绑定属性
@@ -70,15 +62,6 @@ public partial class MainPage : ContentPage
         get => _branchName;
         private set => SetField(ref _branchName, value);
     }
-
-    /// <summary>服务器图标资源名：运行中=绿色，未启动=主题灰。</summary>
-    public string WifiIconSource =>
-        LocalServerService.Shared.IsRunning ? "wifi_on" : "wifi" + ThemeSuffix;
-
-    /// <summary>隐藏文件开关图标资源名：开启=紫色，关闭=主题灰。</summary>
-    public string BrowseIconSource => _showHidden ? "browse_on" : "browse" + ThemeSuffix;
-
-    private string ThemeSuffix => Application.Current?.RequestedTheme == AppTheme.Dark ? "" : "_light";
 
     /// <summary>服务器运行状态文本（含局域网 IP），显示在顶栏。</summary>
     public string ServerStatus => LocalServerService.Shared.IsRunning
@@ -139,7 +122,6 @@ public partial class MainPage : ContentPage
             _showHidden = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(HiddenToggleLabel));
-            OnPropertyChanged(nameof(BrowseIconSource));
         }
     }
 
@@ -334,8 +316,7 @@ public partial class MainPage : ContentPage
         ApplyRepoContext(_root);
 
         OnPropertyChanged(nameof(RootLabel));
-        OnPropertyChanged(nameof(WifiIconSource));
-                OnPropertyChanged(nameof(ServerStatus));
+        OnPropertyChanged(nameof(ServerStatus));
         _ = LoadAsync();
     }
 
@@ -660,7 +641,46 @@ public partial class MainPage : ContentPage
         OnPropertyChanged(nameof(SelectionSummary));
     }
 
-    private void OnEnterSelectionTapped(object? sender, TappedEventArgs e) => EnterSelectionMode();
+    /// <summary>右上「更多」：原本四个独立按钮 + 设置全部收进一个菜单。</summary>
+    private async void OnOverflowTapped(object? sender, TappedEventArgs e)
+    {
+        var server = LocalServerService.Shared;
+        var actions = new List<string>
+        {
+            "浏览位置…",
+            server.IsRunning ? "本地服务（运行中）" : "启动本地服务",
+            _showHidden ? "隐藏隐藏文件" : "显示隐藏文件",
+            "选择项目",
+            "设置"
+        };
+
+        var choice = await DisplayActionSheetAsync("更多", "取消", null, actions.ToArray());
+
+        switch (choice)
+        {
+            case "浏览位置…":
+                OnSwitchRootTapped(sender, e);
+                break;
+
+            case "启动本地服务":
+            case "本地服务（运行中）":
+                OnServerTapped(sender, e);
+                break;
+
+            case "显示隐藏文件":
+            case "隐藏隐藏文件":
+                OnToggleHiddenTapped(sender, e);
+                break;
+
+            case "选择项目":
+                EnterSelectionMode();
+                break;
+
+            case "设置":
+                await Navigation.PushAsync(new SettingsPage());
+                break;
+        }
+    }
 
     private void OnItemPressed(object? sender, PointerEventArgs e)
     {
@@ -686,8 +706,12 @@ public partial class MainPage : ContentPage
 
     private async Task ShowDirectoryMenuAsync(FileItem item)
     {
-        var action = await DisplayActionSheetAsync(item.Name, "取消", null,
-            "新建子文件夹", "重命名", "删除", "选择项目");
+        var options = new List<string> { "新建子文件夹", "重命名", "删除", "选择项目" };
+        // 已是 Git 仓库就不再给「初始化」，避免无意义入口；.git 目录本身也不给。
+        if (item.Name != ".git" && !GitService.IsRepository(item.FullPath))
+            options.Add("初始化 Git 仓库");
+
+        var action = await DisplayActionSheetAsync(item.Name, "取消", null, options.ToArray());
 
         switch (action)
         {
@@ -706,6 +730,29 @@ public partial class MainPage : ContentPage
             case "选择项目":
                 EnterSelection(item);
                 break;
+
+            case "初始化 Git 仓库":
+                await InitRepositoryAsync(item);
+                break;
+        }
+    }
+
+    /// <summary>长按目录 → 初始化 Git 仓库。</summary>
+    private async Task InitRepositoryAsync(FileItem item)
+    {
+        var confirmed = await this.SafeConfirmAsync("初始化 Git 仓库",
+            $"在「{item.Name}」下创建 .git 并初始化？", "初始化", "取消");
+        if (!confirmed) return;
+
+        try
+        {
+            await Task.Run(() => GitService.InitRepository(item.FullPath));
+            await this.SafeAlertAsync("已初始化", $"「{item.Name}」现在是 Git 仓库。", "好");
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            await this.SafeAlertAsync("初始化失败", ex.Message, "好");
         }
     }
 
@@ -772,7 +819,6 @@ public partial class MainPage : ContentPage
             try
             {
                 var url = server.Start(_root, AppSettings.ServerPort);
-                OnPropertyChanged(nameof(WifiIconSource));
                 OnPropertyChanged(nameof(ServerStatus));
 
                 await this.SafeAlertAsync("服务已启动",
@@ -804,7 +850,6 @@ public partial class MainPage : ContentPage
 
             case "停止服务":
                 server.Stop();
-                OnPropertyChanged(nameof(WifiIconSource));
                 OnPropertyChanged(nameof(ServerStatus));
                 break;
         }
