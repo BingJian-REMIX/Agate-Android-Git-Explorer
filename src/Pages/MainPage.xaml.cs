@@ -353,6 +353,31 @@ public partial class MainPage : ContentPage
             if (IsGitRepo) _ = RefreshChangeCountAsync();
             else ChangeCount = 0;
         }
+        catch (UnauthorizedAccessException)
+        {
+            // Android 11+ 硬限制：Android/data 与 Android/obb 对第三方应用一律拒绝，
+            // 即使已授予 MANAGE_EXTERNAL_STORAGE，SAF 也不允许选择该目录。
+            // 这里给准确解释，而不是把原始 .NET 异常当"读取失败"弹出来。
+            var protectedDir = _relativePath.StartsWith("Android/data", StringComparison.OrdinalIgnoreCase)
+                ? "Android/data"
+                : _relativePath.StartsWith("Android/obb", StringComparison.OrdinalIgnoreCase)
+                    ? "Android/obb"
+                    : null;
+
+            if (protectedDir is not null)
+            {
+                await this.SafeAlertAsync("系统保护目录",
+                    $"{protectedDir} 从 Android 11 起禁止第三方应用访问，" +
+                    "「所有文件访问」权限也无法绕过。\n\n" +
+                    "可用系统自带「文件管理」、或安装 Shizuku 后授权访问。", "好");
+            }
+            else
+            {
+                await this.SafeAlertAsync("无权限访问", "该目录不允许访问（可能是系统或其它应用的私有目录）。", "好");
+            }
+
+            await GoUpAsync();
+        }
         catch (Exception ex)
         {
             await this.SafeAlertAsync("读取失败", ex.Message, "好");
