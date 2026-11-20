@@ -75,7 +75,9 @@ public partial class BatchRenamePage : ContentPage
         var errors = _plan.Count(i => i.Error is not null);
         SummaryLabel.Text = errors > 0
             ? $"{_items.Count} 项 · {ready} 项可改 · {errors} 项有冲突"
-            : $"{_items.Count} 项 · 全部可改";
+            : ready == _items.Count
+                ? $"{_items.Count} 项 · 全部可改"
+                : $"{_items.Count} 项 · {ready} 项将改名，其余不变";
         ApplyButton.IsEnabled = ready > 0 && errors == 0;
         StatusLabel.IsVisible = false;
     }
