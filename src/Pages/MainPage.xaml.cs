@@ -1384,6 +1384,10 @@ public partial class MainPage : ContentPage
             return;
         }
 
+        // Android 12 及以下读取共享存储需要运行时权限；Android 13+ 该权限已废弃，
+        // 这里拿到 Denied 也不影响后续（受限目录另有说明，见 LoadAsync 的异常分支）。
+        await StorageAccess.EnsureStoragePermissionAsync();
+
         if (!StorageAccess.ExternalRootExists())
         {
             await this.SafeAlertAsync("找不到手机存储", $"目录不存在：{StorageAccess.ExternalRoot}", "好");

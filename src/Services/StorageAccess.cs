@@ -1,5 +1,7 @@
 namespace Agate.Services;
 
+using Microsoft.Maui.ApplicationModel;
+
 /// <summary>
 /// Android 11+ 的全盘访问权限。App 沙盒内读文件不需要它，浏览手机存储才需要。
 /// </summary>
@@ -70,5 +72,31 @@ public static class StorageAccess
     {
         try { return Directory.Exists(ExternalRoot); }
         catch (Exception) { return false; }
+    }
+
+    /// <summary>
+    /// 运行时申请「文件与媒体」权限，Android 12 及以下读取共享存储需要它。
+    /// 注意：它不能解锁 Android/data、Android/obb —— 那是系统级封锁，见 MainPage 的提示文案。
+    /// </summary>
+    public static async Task<bool> EnsureStoragePermissionAsync()
+    {
+#if ANDROID
+        try
+        {
+            var status = await Permissions.CheckStatusAsync<Permissions.StorageRead>();
+            if (status == PermissionStatus.Granted) return true;
+
+            status = await Permissions.RequestAsync<Permissions.StorageRead>();
+            return status == PermissionStatus.Granted;
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("perm-storage", ex);
+            return false;
+        }
+#else
+        await Task.CompletedTask;
+        return true;
+#endif
     }
 }
