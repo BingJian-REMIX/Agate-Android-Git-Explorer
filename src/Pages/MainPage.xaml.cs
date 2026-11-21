@@ -3,10 +3,10 @@ using System.IO.Compression;
 using System.Windows.Input;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Storage;
-using Pebble.Models;
-using Pebble.Services;
+using Agate.Models;
+using Agate.Services;
 
-namespace Pebble;
+namespace Agate;
 
 public partial class MainPage : ContentPage
 {
@@ -623,7 +623,7 @@ public partial class MainPage : ContentPage
                 options.Add("播放");
                 break;
             case FileKind.Unknown:
-                // 未知 / 无扩展名：提供 Pebble 自带的源码查看，而不是只有系统打开
+                // 未知 / 无扩展名：提供 Agate 自带的源码查看，而不是只有系统打开
                 options.Add("编辑（源码）");
                 break;
         }
@@ -1374,7 +1374,7 @@ public partial class MainPage : ContentPage
         if (!StorageAccess.HasAllFilesAccess())
         {
             var go = await this.SafeConfirmAsync("需要「所有文件访问」权限",
-                "浏览手机文件需要该权限。\n\n接下来会打开系统设置页，请在列表里找到 Pebble 并允许。",
+                "浏览手机文件需要该权限。\n\n接下来会打开系统设置页，请在列表里找到 Agate 并允许。",
                 "去授权", "取消");
             if (!go) return;
 

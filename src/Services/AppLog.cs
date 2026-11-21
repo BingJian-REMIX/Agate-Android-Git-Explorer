@@ -1,4 +1,4 @@
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>崩溃/异常留痕：写 logcat（Android）+ 私有目录日志文件，方便定位闪退。</summary>
 internal static class AppLog
@@ -7,15 +7,15 @@ internal static class AppLog
     {
         if (ex is null) return;
 
-        System.Diagnostics.Debug.WriteLine($"[Pebble:{tag}] {ex}");
+        System.Diagnostics.Debug.WriteLine($"[Agate:{tag}] {ex}");
 
 #if ANDROID
-        Android.Util.Log.Error("Pebble", $"{tag}: {ex}");
+        Android.Util.Log.Error("Agate", $"{tag}: {ex}");
 #endif
 
         try
         {
-            var path = Path.Combine(FileSystem.AppDataDirectory, "pebble.log");
+            var path = Path.Combine(FileSystem.AppDataDirectory, "agate.log");
             File.AppendAllText(path, $"[{DateTime.Now:HH:mm:ss}] {tag}: {ex}\n\n");
         }
         catch (Exception)

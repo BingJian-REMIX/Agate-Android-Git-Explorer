@@ -1,4 +1,4 @@
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>
 /// 大文件分割与合并。全部流式读写（固定缓冲区），不把整个文件读进内存，

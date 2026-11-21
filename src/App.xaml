@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:conv="clr-namespace:Pebble.Converters"
-             x:Class="Pebble.App">
+             xmlns:conv="clr-namespace:Agate.Converters"
+             x:Class="Agate.App">
     <Application.Resources>
         <ResourceDictionary>
             <!-- 双主题色值直接写在各属性的 AppThemeBinding 里。

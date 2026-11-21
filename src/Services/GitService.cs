@@ -1,7 +1,7 @@
 using LibGit2Sharp;
-using Pebble.Models;
+using Agate.Models;
 
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>一次 Commit + Push 的结果。Success=false 时 Message 为可直接展示给用户的错误说明。</summary>
 public sealed record CommitPushResult(bool Success, string Message, string? CommitSha = null);
@@ -435,13 +435,13 @@ public sealed class GitService
 
         if (string.IsNullOrWhiteSpace(name))
         {
-            name = "Pebble";
+            name = "Agate";
             repo.Config.Set("user.name", name, ConfigurationLevel.Local);
         }
 
         if (string.IsNullOrWhiteSpace(email))
         {
-            email = "pebble@localhost";
+            email = "agate@localhost";
             repo.Config.Set("user.email", email, ConfigurationLevel.Local);
         }
 

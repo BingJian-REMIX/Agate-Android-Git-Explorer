@@ -4,10 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.Maui.Storage;
-using Pebble.Models;
-using Pebble.Services;
+using Agate.Models;
+using Agate.Services;
 
-namespace Pebble;
+namespace Agate;
 
 public partial class NetworkBrowserPage : ContentPage, INotifyPropertyChanged
 {
@@ -204,11 +204,11 @@ public partial class NetworkBrowserPage : ContentPage, INotifyPropertyChanged
         }
     }
 
-    /// <summary>本地落盘根目录：优先手机 Download/Pebble，不可写则回退到应用缓存。</summary>
+    /// <summary>本地落盘根目录：优先手机 Download/Agate，不可写则回退到应用缓存。</summary>
     private static string GetLocalBase()
     {
         var root = StorageAccess.ExternalRootExists()
-            ? Path.Combine(StorageAccess.ExternalRoot, "Download", "Pebble")
+            ? Path.Combine(StorageAccess.ExternalRoot, "Download", "Agate")
             : Path.Combine(FileSystem.CacheDirectory, "webdav");
         Directory.CreateDirectory(root);
         return root;

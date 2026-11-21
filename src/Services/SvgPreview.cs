@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>
 /// 生成 WebView 用的 SVG 预览页：与 CodePreview / MarkdownPreview 同构（自包含 HTML、离线可用、随深浅色切换背景）。

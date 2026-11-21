@@ -1,4 +1,4 @@
-# Pebble（卵石）
+# Agate（玛瑙）
 
 Android 优先的 Git 文件浏览器。技术栈：.NET MAUI + LibGit2Sharp，支持亮/暗双主题。
 
@@ -6,14 +6,14 @@ Android 优先的 Git 文件浏览器。技术栈：.NET MAUI + LibGit2Sharp，�
 
 前置：.NET SDK 10、`maui-android` / `maui-windows` workload、Android SDK、JDK 17。
 
-源码统一放在 `src/` 下；`Pebble.csproj` 已把本机 SDK 路径写进 `AndroidSdkDirectory` / `JavaSdkDirectory`，换机器删掉那两行、改用 `ANDROID_HOME` / `JAVA_HOME` 环境变量即可。
+源码统一放在 `src/` 下；`Agate.csproj` 已把本机 SDK 路径写进 `AndroidSdkDirectory` / `JavaSdkDirectory`，换机器删掉那两行、改用 `ANDROID_HOME` / `JAVA_HOME` 环境变量即可。
 
 ```bash
 cd src                                          # 工程目录
 dotnet build                                    # 全部目标
 dotnet run   -f net10.0-windows10.0.19041.0     # 桌面调试
 dotnet build -f net10.0-android                 # 出 APK
-# 产物：src/bin/Debug/net10.0-android/com.pebble.app-Signed.apk
+# 产物：src/bin/Debug/net10.0-android/com.agate.app-Signed.apk
 ```
 
 ## 当前状态
@@ -28,7 +28,7 @@ dotnet build -f net10.0-android                 # 出 APK
 
 `LibGit2Sharp.NativeBinaries 2.0.324` 没有 android RID。.NET Android 的 RID 兜底会把 `linux-arm64` 的 **glibc** 产物复制成 `lib/arm64-v8a/libgit2-5853918.so`（`e_machine` 也是 AArch64，光看架构分辨不出来），真机 `dlopen` 必失败。所以：
 
-- csproj 里用 `PebbleDropForeignGit2` 这个 Target 在 `ResolvePackageAssets` 之后把 NuGet 的 `libgit2-5853918` 从 `NativeCopyLocalItems` / `RuntimeCopyLocalItems` 剔除，否则它会先占位（XA4301）
+- csproj 里用 `AgateDropForeignGit2` 这个 Target 在 `ResolvePackageAssets` 之后把 NuGet 的 `libgit2-5853918` 从 `NativeCopyLocalItems` / `RuntimeCopyLocalItems` 剔除，否则它会先占位（XA4301）
 - 真正的库来自 `src/Platforms/Android/libs/arm64-v8a/libgit2-5853918.so`（NDK r30 交叉编译）
 
 当前产物：libgit2 **1.9.1** + mbedTLS 2.28.9 静态链接，`e_machine=0xB7`，只依赖 `libc.so` / `libdl.so`，无 `GLIBC_` 符号。
@@ -108,8 +108,8 @@ Android 没有 `/etc/ssl/certs`，mbedTLS 不会自动找到根证书。`TlsBoot
 ## 目录
 
 ```
-Pebble/
-├─ src/                               MAUI 工程根（Pebble.csproj 所在）
+Agate/
+├─ src/                               MAUI 工程根（Agate.csproj 所在）
 │  ├─ App.xaml(.cs) / MauiProgram.cs  应用入口与初始化
 │  ├─ Pages/                         各界面
 │  │   ├─ MainPage.xaml(.cs)          文件列表 + 多选栏 + FAB + Git 抽屉

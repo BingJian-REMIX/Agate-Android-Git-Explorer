@@ -2,10 +2,10 @@ using CommunityToolkit.Maui.Converters;
 using CommunityToolkit.Maui.Views;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
-using Pebble.Models;
-using Pebble.Services;
+using Agate.Models;
+using Agate.Services;
 
-namespace Pebble;
+namespace Agate;
 
 public partial class MediaPage : ContentPage
 {

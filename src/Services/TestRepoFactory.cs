@@ -1,7 +1,7 @@
 using LibGit2Sharp;
 using Microsoft.Maui.Storage;
 
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>
 /// 首次启动时在 App 私有目录里造一个可离线演示的仓库：
@@ -23,17 +23,17 @@ public static class TestRepoFactory
 
         using (var repo = new Repository(root))
         {
-            repo.Config.Set("user.name", "Pebble", ConfigurationLevel.Local);
-            repo.Config.Set("user.email", "pebble@localhost", ConfigurationLevel.Local);
+            repo.Config.Set("user.name", "Agate", ConfigurationLevel.Local);
+            repo.Config.Set("user.email", "agate@localhost", ConfigurationLevel.Local);
 
-            WriteFile(root, "README.md", "# Pebble test repo\n\n这是 App 私有目录里的离线演示仓库。\n");
+            WriteFile(root, "README.md", "# Agate test repo\n\n这是 App 私有目录里的离线演示仓库。\n");
             WriteFile(root, "src/main.cs", "Console.WriteLine(\"hello\");\n");
             WriteFile(root, "src/utils.cs", "static int Add(int a, int b) => a + b;\n");
             WriteFile(root, "docs/notes.md", "- note 1\n");
             WriteFile(root, "docs/guide.md", "- guide\n");
 
             Commands.Stage(repo, "*");
-            var signature = new Signature("Pebble", "pebble@localhost", DateTimeOffset.Now);
+            var signature = new Signature("Agate", "agate@localhost", DateTimeOffset.Now);
             repo.Commit("init: seed test repo", signature, signature);
 
             // 本地 bare 仓库当 origin，这样 Commit & Push 全链路不用联网也能跑。
@@ -55,7 +55,7 @@ public static class TestRepoFactory
             catch (Exception) { /* 推送失败不影响本地演示 */ }
 
             // 制造 Modified / New / Deleted 三种状态，让首屏就能看到徽章。
-            WriteFile(root, "src/main.cs", "Console.WriteLine(\"hello, pebble\");\n");
+            WriteFile(root, "src/main.cs", "Console.WriteLine(\"hello, agate\");\n");
             WriteFile(root, "notes/todo.md", "- [ ] try commit & push\n");
             File.Delete(Path.Combine(root, "docs", "notes.md"));
         }

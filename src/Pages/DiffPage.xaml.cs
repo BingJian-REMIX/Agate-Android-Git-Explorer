@@ -1,7 +1,7 @@
 using System.Net;
-using Pebble.Services;
+using Agate.Services;
 
-namespace Pebble;
+namespace Agate;
 
 public partial class DiffPage : ContentPage
 {

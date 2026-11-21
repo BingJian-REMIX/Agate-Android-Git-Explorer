@@ -1,12 +1,12 @@
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
-using Pebble.Services;
+using Agate.Services;
 
 #if ANDROID
 using Microsoft.Maui.Handlers;
 #endif
 
-namespace Pebble;
+namespace Agate;
 
 public static class MauiProgram
 {

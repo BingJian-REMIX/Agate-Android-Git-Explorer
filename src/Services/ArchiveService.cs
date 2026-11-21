@@ -4,7 +4,7 @@ using SharpCompress.Writers;
 using SharpCompress.Writers.Zip;
 using System.Linq;
 
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>归档内单条目信息（仅列举，不解压到磁盘）。</summary>
 public sealed class ArchiveEntryInfo
@@ -223,7 +223,7 @@ public static class ArchiveService
         // 临时文件与原文件同目录（保证同卷，Move 才原子）
         var tmp = Path.Combine(
             Path.GetDirectoryName(sourcePath) ?? ".",
-            Path.GetFileName(sourcePath) + ".pebble-tmp-" + Guid.NewGuid().ToString("N").Substring(0, 8));
+            Path.GetFileName(sourcePath) + ".agate-tmp-" + Guid.NewGuid().ToString("N").Substring(0, 8));
 
         try
         {

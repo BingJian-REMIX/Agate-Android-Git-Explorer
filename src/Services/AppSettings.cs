@@ -1,4 +1,4 @@
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>App 级持久化设置：GitHub Token、主题、服务器端口。基于 Preferences（Android 上等价 SharedPreferences）。</summary>
 public static class AppSettings

@@ -3,7 +3,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>
 /// 极简静态文件服务器：以 Git 仓库根为根目录，让电脑浏览器预览手机上的网页。

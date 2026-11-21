@@ -3,10 +3,10 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Maui.ApplicationModel;
-using Pebble.Models;
-using Pebble.Services;
+using Agate.Models;
+using Agate.Services;
 
-namespace Pebble;
+namespace Agate;
 
 /// <summary>
 /// 十六进制查看器：只读 / 编辑双模式。
@@ -103,7 +103,7 @@ public partial class HexViewerPage : ContentPage
 
             // 2) 保存前先备份原文件（带时间戳，不覆盖上一次备份）
             var stamp = DateTime.Now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-            var backup = _item.FullPath + ".pebble-bak-" + stamp;
+            var backup = _item.FullPath + ".agate-bak-" + stamp;
             File.Copy(_item.FullPath, backup, overwrite: false);
 
             // 3) 用 FileStream.Seek 精准写回每一个被修改的字节

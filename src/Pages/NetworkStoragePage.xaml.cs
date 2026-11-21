@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
-using Pebble.Services;
+using Agate.Services;
 
-namespace Pebble;
+namespace Agate;
 
 public partial class NetworkStoragePage : ContentPage
 {

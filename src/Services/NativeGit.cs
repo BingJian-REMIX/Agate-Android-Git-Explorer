@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>
 /// Android 上 libgit2 用 mbedTLS，没有系统证书库，必须显式喂 CA bundle。

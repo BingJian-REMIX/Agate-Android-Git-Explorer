@@ -1,9 +1,9 @@
 using System.IO;
 using Microsoft.Maui.Controls;
-using Pebble.Models;
-using Pebble.Services;
+using Agate.Models;
+using Agate.Services;
 
-namespace Pebble;
+namespace Agate;
 
 public partial class FontPreviewPage : ContentPage
 {
@@ -65,7 +65,7 @@ public partial class FontPreviewPage : ContentPage
             samples.Append(
                 "<div style='margin:14px 0'>" +
                 "<div style='font-size:11px;color:" + dim + ";margin-bottom:4px'>" + label + " · " + size + "</div>" +
-                "<div style='font-family:PebbleFont;font-size:" + size + ";line-height:1.3'>" +
+                "<div style='font-family:AgateFont;font-size:" + size + ";line-height:1.3'>" +
                 "永和九年岁在癸丑暮春之初 · The quick brown fox 0123456789</div></div>");
         }
 
@@ -74,7 +74,7 @@ public partial class FontPreviewPage : ContentPage
         {
             var t = ch == ' ' ? "&nbsp;" : ch.ToString();
             grid.Append("<span style='display:inline-block;min-width:1.6em;text-align:center;" +
-                        "font-family:PebbleFont;font-size:26px;padding:8px 0'>" + t + "</span>");
+                        "font-family:AgateFont;font-size:26px;padding:8px 0'>" + t + "</span>");
         }
 
         const string template = """
@@ -86,7 +86,7 @@ public partial class FontPreviewPage : ContentPage
 <style>
   html, body { margin:0; padding:16px 18px; background:__BG__; color:__FG__;
     font:15px/1.6 -apple-system, system-ui, sans-serif; }
-  @font-face { font-family:'PebbleFont'; src:url(data:font/ttf;base64,__B64__) format('truetype'); }
+  @font-face { font-family:'AgateFont'; src:url(data:font/ttf;base64,__B64__) format('truetype'); }
   .card { background:__CARD__; border-radius:14px; padding:16px 18px; margin-bottom:14px; }
   .grid { background:__CARD__; border-radius:14px; padding:14px; line-height:2; word-spacing:2px; }
 </style>

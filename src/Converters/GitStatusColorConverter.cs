@@ -1,7 +1,7 @@
 using System.Globalization;
-using Pebble.Models;
+using Agate.Models;
 
-namespace Pebble.Converters;
+namespace Agate.Converters;
 
 /// <summary>
 /// 把 GitFileStatus 转成徽章颜色。

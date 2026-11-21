@@ -1,7 +1,7 @@
 using System.IO.Compression;
-using Pebble.Models;
+using Agate.Models;
 
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>复制/移动/解压遇到同名目标时的处理策略。</summary>
 public enum ConflictAction

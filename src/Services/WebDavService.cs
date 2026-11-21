@@ -2,9 +2,9 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Xml.Linq;
-using Pebble.Models;
+using Agate.Models;
 
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>
 /// WebDAV 客户端：基于 System.Net.Http 直接发 PROPFIND / GET / PUT / MKCOL，不依赖平台 API。

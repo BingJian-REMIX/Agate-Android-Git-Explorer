@@ -1,9 +1,9 @@
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
-using Pebble.Models;
-using Pebble.Services;
+using Agate.Models;
+using Agate.Services;
 
-namespace Pebble;
+namespace Agate;
 
 public partial class FileSplitPage : ContentPage
 {

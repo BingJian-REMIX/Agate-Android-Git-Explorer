@@ -1,4 +1,4 @@
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>一个书签：名称 + 绝对路径。</summary>
 public sealed record Bookmark(string Name, string Path);

@@ -1,4 +1,4 @@
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>
 /// Android 15 起强制 edge-to-edge，状态栏背景透明。

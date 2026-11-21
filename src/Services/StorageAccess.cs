@@ -1,4 +1,4 @@
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>
 /// Android 11+ 的全盘访问权限。App 沙盒内读文件不需要它，浏览手机存储才需要。

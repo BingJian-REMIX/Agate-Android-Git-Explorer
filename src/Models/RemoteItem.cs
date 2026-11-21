@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Pebble.Models;
+namespace Agate.Models;
 
 /// <summary>WebDAV 远端目录列表中的一项。路径均相对远端根，'/' 分隔，无首尾斜杠。</summary>
 public sealed class RemoteItem : INotifyPropertyChanged

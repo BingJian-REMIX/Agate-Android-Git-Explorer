@@ -1,4 +1,4 @@
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>
 /// 首次使用时把打包的 CA bundle 落到私有目录，并交给 libgit2。

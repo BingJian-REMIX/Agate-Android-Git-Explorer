@@ -1,6 +1,6 @@
 using Markdig;
 
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>把 Markdown 渲染成带主题配色的 HTML，供编辑器「预览」模式使用。</summary>
 public static class MarkdownPreview

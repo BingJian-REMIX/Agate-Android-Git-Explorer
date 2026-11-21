@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Pebble.Services;
+namespace Agate.Services;
 
 public enum RenameMode
 {
@@ -198,7 +198,7 @@ public static class BatchRenamer
             if (!item.CanApply) continue;
 
             var directory = Path.GetDirectoryName(item.SourcePath)!;
-            var temp = Path.Combine(directory, ".pebble-rename-" + Guid.NewGuid().ToString("N"));
+            var temp = Path.Combine(directory, ".agate-rename-" + Guid.NewGuid().ToString("N"));
 
             if (Directory.Exists(item.SourcePath)) Directory.Move(item.SourcePath, temp);
             else File.Move(item.SourcePath, temp);

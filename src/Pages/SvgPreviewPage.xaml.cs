@@ -1,8 +1,8 @@
 using Microsoft.Maui.ApplicationModel;
-using Pebble.Models;
-using Pebble.Services;
+using Agate.Models;
+using Agate.Services;
 
-namespace Pebble;
+namespace Agate;
 
 /// <summary>
 /// 用 WebView 渲染 SVG 图像（MAUI 的 Image 控件无法直接显示 SVG）。

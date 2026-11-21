@@ -1,6 +1,6 @@
 using Microsoft.Maui.Storage;
 
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>一个网络存储连接。密码不随此对象序列化，单独存 SecureStorage。</summary>
 public sealed class NetworkConnection

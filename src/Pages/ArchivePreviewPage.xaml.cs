@@ -2,10 +2,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using Microsoft.Maui.Storage;
-using Pebble.Models;
-using Pebble.Services;
+using Agate.Models;
+using Agate.Services;
 
-namespace Pebble;
+namespace Agate;
 
 /// <summary>
 /// 不解压预览：打开压缩包后逐层浏览内部文件夹 / 文件（支持多层钻取），不向磁盘解压。

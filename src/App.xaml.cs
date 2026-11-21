@@ -1,7 +1,7 @@
 using Microsoft.Maui.ApplicationModel;
-using Pebble.Services;
+using Agate.Services;
 
-namespace Pebble;
+namespace Agate;
 
 public partial class App : Application
 {
@@ -28,7 +28,7 @@ public partial class App : Application
         // 桌面调试时按手机竖屏比例开窗，方便对照 Android 效果。
         var window = new Window(navigation)
         {
-            Title = "Pebble",
+            Title = "Agate",
             Width = 400,
             Height = 780
         };

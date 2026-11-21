@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Pebble.Models;
+namespace Agate.Models;
 
 /// <summary>文件在 Git 工作区中的状态。数值用于目录状态聚合时的优先级比较。</summary>
 public enum GitFileStatus

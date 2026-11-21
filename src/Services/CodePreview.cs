@@ -1,7 +1,7 @@
 using System.IO;
 using System.Text.Json;
 
-namespace Pebble.Services;
+namespace Agate.Services;
 
 /// <summary>
 /// 生成 WebView 用的代码编辑器页面：透明 textarea 负责输入，底层 pre 显示高亮。
