@@ -16,30 +16,50 @@ public partial class SettingsPage : ContentPage
         };
 
         PortEntry.Text = AppSettings.ServerPort.ToString();
+
+        AutoPushSwitch.IsToggled = AppSettings.AutoPush;
+        ForcePushSwitch.IsToggled = AppSettings.ForcePush;
+        PullPicker.SelectedIndex = (int)AppSettings.PullBeforePush;
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
 
-        var token = await AppSettings.GetGitHubTokenAsync();
-        if (!string.IsNullOrEmpty(token)) TokenEntry.Text = token;
-
+        RefreshTokenSummary();
         await RefreshShizukuStatusAsync();
     }
 
-    private async void OnSaveTokenClicked(object? sender, EventArgs e)
+    private void RefreshTokenSummary()
     {
-        var token = TokenEntry.Text?.Trim();
-        if (string.IsNullOrEmpty(token))
-        {
-            await AppSettings.SetGitHubTokenAsync(null);
-            await this.SafeAlertAsync("已清除", "GitHub Token 已清除。", "好");
-            return;
-        }
+        var credentials = CredentialStore.Load();
+        TokenCountLabel.Text = credentials.Count == 0
+            ? "尚未保存任何 Token（公开仓库可匿名推送）"
+            : $"已保存 {credentials.Count} 条：" + string.Join("、", credentials.Select(c => c.DisplayName));
+    }
 
-        await AppSettings.SetGitHubTokenAsync(token);
-        await this.SafeAlertAsync("已保存", "Token 已写入系统安全存储。", "好");
+    private async void OnManageTokensClicked(object? sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new TokenManagerPage());
+    }
+
+    private void OnAutoPushToggled(object? sender, ToggledEventArgs e)
+    {
+        AppSettings.AutoPush = e.Value;
+        AppSettings.ApplyPushPolicy();
+    }
+
+    private void OnForcePushToggled(object? sender, ToggledEventArgs e)
+    {
+        AppSettings.ForcePush = e.Value;
+        AppSettings.ApplyPushPolicy();
+    }
+
+    private void OnPullStrategyChanged(object? sender, EventArgs e)
+    {
+        if (PullPicker.SelectedIndex < 0) return;
+        AppSettings.PullBeforePush = (PullStrategy)PullPicker.SelectedIndex;
+        AppSettings.ApplyPushPolicy();
     }
 
     private void OnThemeChanged(object? sender, EventArgs e)

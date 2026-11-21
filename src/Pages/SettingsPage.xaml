@@ -8,27 +8,15 @@
     <ScrollView>
         <VerticalStackLayout Padding="16,16,16,32" Spacing="20">
 
-            <!-- GitHub Token -->
+            <!-- Token 管理 -->
             <VerticalStackLayout Spacing="8">
-                <Label Text="GitHub Token" FontSize="13" FontAttributes="Bold"
+                <Label Text="Token 管理" FontSize="13" FontAttributes="Bold"
                        TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
-                <Label Text="用于 Clone / Push 私有仓库。保存在系统安全存储 (SecureStorage)。"
+                <Label Text="支持 GitHub、GitLab、Gitee、Bitbucket、CNB、Gitea 等平台，可同时保存多个账号；推送时按远端主机自动匹配。Token 存在系统安全存储里。"
                        FontSize="11" TextColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}" />
-                <Border BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#10131C}"
-                        Stroke="{AppThemeBinding Light=#DCE1EC, Dark=#1E2434}" StrokeThickness="1"
-                        Padding="12,0">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="12" />
-                    </Border.StrokeShape>
-                    <Entry x:Name="TokenEntry"
-                           IsPassword="True"
-                           Placeholder="ghp_… 或留空清除"
-                           PlaceholderColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}"
-                           TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}"
-                           BackgroundColor="Transparent"
-                           HeightRequest="46" />
-                </Border>
-                <Button Text="保存 Token" Clicked="OnSaveTokenClicked" Style="{StaticResource CtxButton}" />
+                <Label x:Name="TokenCountLabel" Text=""
+                       FontSize="12" TextColor="{AppThemeBinding Light=#5F6779, Dark=#8B94A8}" />
+                <Button Text="管理 Token" Clicked="OnManageTokensClicked" Style="{StaticResource CtxButton}" />
             </VerticalStackLayout>
 
             <!-- 主题 -->
@@ -65,6 +53,42 @@
                            HeightRequest="46" />
                 </Border>
                 <Button Text="保存端口" Clicked="OnSavePortClicked" Style="{StaticResource CtxButton}" />
+            </VerticalStackLayout>
+
+            <!-- 提交与推送 -->
+            <VerticalStackLayout Spacing="10">
+                <Label Text="提交与推送" FontSize="13" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
+                <Label Text="控制点「提交」之后的行为。远端有新提交导致被拒时，把「推送前先拉取」改成 rebase 通常就能直接推上去。"
+                       FontSize="11" TextColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}" />
+
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Text="提交后自动推送" FontSize="12" VerticalOptions="Center"
+                           TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
+                    <Switch x:Name="AutoPushSwitch" Grid.Column="1" Toggled="OnAutoPushToggled" />
+                </Grid>
+
+                <Label Text="推送前先拉取" FontSize="12"
+                       TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
+                <Picker x:Name="PullPicker" SelectedIndexChanged="OnPullStrategyChanged">
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>不拉取，直接推</x:String>
+                            <x:String>先 rebase 再推</x:String>
+                            <x:String>先 merge 再推</x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
+
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                        <Label Text="强制推送" FontSize="12"
+                               TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
+                        <Label Text="会用本地历史覆盖远端同名分支，仅在确定远端没有别人的提交时打开。"
+                               FontSize="10" TextColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}" />
+                    </VerticalStackLayout>
+                    <Switch x:Name="ForcePushSwitch" Grid.Column="1" VerticalOptions="Center" Toggled="OnForcePushToggled" />
+                </Grid>
             </VerticalStackLayout>
 
             <!-- Shizuku（受限目录访问） -->

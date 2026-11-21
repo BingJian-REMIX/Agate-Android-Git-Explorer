@@ -39,6 +39,37 @@ public static class AppSettings
         set => Preferences.Default.Set(KeyPort, value);
     }
 
+    // ---------------------------------------------------------------- 提交与推送策略
+
+    private const string KeyAutoPush = "push_auto";
+    private const string KeyForcePush = "push_force";
+    private const string KeyPullStrategy = "push_pull";
+
+    /// <summary>提交后是否自动推送。关掉后只做本地提交。</summary>
+    public static bool AutoPush
+    {
+        get => Preferences.Default.Get(KeyAutoPush, true);
+        set => Preferences.Default.Set(KeyAutoPush, value);
+    }
+
+    /// <summary>是否强制推送（覆盖远端分支）。默认关闭。</summary>
+    public static bool ForcePush
+    {
+        get => Preferences.Default.Get(KeyForcePush, false);
+        set => Preferences.Default.Set(KeyForcePush, value);
+    }
+
+    /// <summary>推送前是否先拉取，以及用 rebase 还是 merge。</summary>
+    public static PullStrategy PullBeforePush
+    {
+        get => (PullStrategy)Preferences.Default.Get(KeyPullStrategy, (int)PullStrategy.None);
+        set => Preferences.Default.Set(KeyPullStrategy, (int)value);
+    }
+
+    /// <summary>把当前设置同步到 GitService。改完设置或启动时调用。</summary>
+    public static void ApplyPushPolicy()
+        => GitService.Policy = new GitPushPolicy(AutoPush, ForcePush, PullBeforePush);
+
     // ---------------------------------------------------------------- GitHub Token
 
     /// <summary>读 GitHub Token。SecureStorage 在部分设备上可能不可用，读失败返回 null 而非抛异常。</summary>

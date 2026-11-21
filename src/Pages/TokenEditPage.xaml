@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Agate.TokenEditPage"
+             Title="Token"
+             BackgroundColor="{AppThemeBinding Light=#F7F8FC, Dark=#07090F}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16,16,16,32" Spacing="18">
+
+            <!-- Token -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="访问令牌" FontSize="13" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
+                <Label Text="粘贴后会自动识别平台。Token 存在系统安全存储里，不写入配置文件。"
+                       FontSize="11" TextColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}" />
+                <Border BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#10131C}"
+                        Stroke="{AppThemeBinding Light=#DCE1EC, Dark=#1E2434}" StrokeThickness="1"
+                        Padding="12,0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <Entry x:Name="TokenEntry"
+                           IsPassword="True"
+                           Placeholder="ghp_ / glpat- / 或各平台自定义令牌"
+                           PlaceholderColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}"
+                           TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}"
+                           BackgroundColor="Transparent"
+                           HeightRequest="46"
+                           TextChanged="OnTokenChanged" />
+                </Border>
+                <Label x:Name="DetectLabel" Text=""
+                       FontSize="11" TextColor="{AppThemeBinding Light=#5B4BE0, Dark=#7C5CFF}" />
+            </VerticalStackLayout>
+
+            <!-- 平台 -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="平台" FontSize="13" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
+                <Picker x:Name="PlatformPicker" SelectedIndexChanged="OnPlatformChanged" />
+            </VerticalStackLayout>
+
+            <!-- 主机 -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="主机名" FontSize="13" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
+                <Label Text="推送时按它匹配仓库的远端地址，例如 github.com。自建实例填你的域名。"
+                       FontSize="11" TextColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}" />
+                <Border BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#10131C}"
+                        Stroke="{AppThemeBinding Light=#DCE1EC, Dark=#1E2434}" StrokeThickness="1"
+                        Padding="12,0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <Entry x:Name="HostEntry"
+                           Placeholder="github.com"
+                           PlaceholderColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}"
+                           TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}"
+                           BackgroundColor="Transparent"
+                           HeightRequest="46"
+                           Keyboard="Url" />
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- 用户名 -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="用户名" FontSize="13" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
+                <Label Text="多数平台用令牌当密码，用户名按平台约定填：GitHub 用 x-access-token，GitLab 用 oauth2，Bitbucket 用 x-token-auth，CNB 用 cnb。"
+                       FontSize="11" TextColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}" />
+                <Border BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#10131C}"
+                        Stroke="{AppThemeBinding Light=#DCE1EC, Dark=#1E2434}" StrokeThickness="1"
+                        Padding="12,0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <Entry x:Name="UserEntry"
+                           Placeholder="x-access-token"
+                           PlaceholderColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}"
+                           TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}"
+                           BackgroundColor="Transparent"
+                           HeightRequest="46" />
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- 备注 -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="备注（可选）" FontSize="13" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
+                <Border BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#10131C}"
+                        Stroke="{AppThemeBinding Light=#DCE1EC, Dark=#1E2434}" StrokeThickness="1"
+                        Padding="12,0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <Entry x:Name="LabelEntry"
+                           Placeholder="例如：工作号 / 个人号"
+                           PlaceholderColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}"
+                           TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}"
+                           BackgroundColor="Transparent"
+                           HeightRequest="46" />
+                </Border>
+            </VerticalStackLayout>
+
+            <Button Text="保存" Clicked="OnSaveClicked" Style="{StaticResource CtxButton}" />
+            <Button x:Name="OpenTokenPageButton" Text="打开该平台的 Token 申请页"
+                    Clicked="OnOpenTokenPageClicked" Style="{StaticResource CtxButton}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

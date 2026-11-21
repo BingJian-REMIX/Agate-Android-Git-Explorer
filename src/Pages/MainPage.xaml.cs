@@ -45,6 +45,11 @@ public partial class MainPage : ContentPage
         InitializeComponent();
         RefreshCommand = new Command(async () => await LoadAsync());
         BindingContext = this;
+
+        // 凭据与推送策略是全局的，在这里接一次即可；GitService 本身保持不依赖 MAUI。
+        GitService.CredentialResolver = CredentialStore.ResolveAsync;
+        AppSettings.ApplyPushPolicy();
+        _ = CredentialStore.MigrateLegacyAsync();
     }
 
     // ------------------------------------------------------------- 绑定属性
@@ -904,11 +909,16 @@ public partial class MainPage : ContentPage
         try
         {
             await Task.Run(() => GitService.InitRepository(item.FullPath));
+
+            // 初始化只写了 .git，界面上的仓库上下文（IsGitRepo / 分支名 / M·U·D 徽章）
+            // 不会自己变；必须把浏览根切到该目录并重算一次，否则看起来像失败。
+            SwitchRoot(item.FullPath);
+
             await this.SafeAlertAsync("已初始化", $"「{item.Name}」现在是 Git 仓库。", "好");
-            await LoadAsync();
         }
         catch (Exception ex)
         {
+            AppLog.Error("git-init", ex);
             await this.SafeAlertAsync("初始化失败", ex.Message, "好");
         }
     }
