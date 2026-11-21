@@ -103,4 +103,16 @@
 		</AndroidNativeLibrary>
 	</ItemGroup>
 
+	<!-- Shizuku 客户端（Apache-2.0）：api 提供 Shizuku 静态入口，aidl 提供
+	     IShizukuService/IRemoteProcess，provider 提供 binder 分发用的 ContentProvider。
+	     直接引用本地 AAR，避免每次构建都去 Maven 拉包。 -->
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+		<AndroidLibrary Include="Platforms\Android\libs\shizuku-api-13.1.5.aar" />
+		<AndroidLibrary Include="Platforms\Android\libs\shizuku-aidl-13.1.5.aar" />
+		<AndroidLibrary Include="Platforms\Android\libs\shizuku-provider-13.1.5.aar" />
+		<!-- Java 桥接层：默认的 Java 源 glob 不收 Platforms 下的文件，必须显式登记，
+		     否则 C# 侧 FindClass 会在运行期抛 ClassNotFoundException。 -->
+		<AndroidJavaSource Include="Platforms\Android\ShizukuShell.java" />
+	</ItemGroup>
+
 </Project>

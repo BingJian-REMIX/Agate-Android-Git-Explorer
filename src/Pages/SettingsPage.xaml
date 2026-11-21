@@ -67,6 +67,18 @@
                 <Button Text="保存端口" Clicked="OnSavePortClicked" Style="{StaticResource CtxButton}" />
             </VerticalStackLayout>
 
+            <!-- Shizuku（受限目录访问） -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Shizuku 权限" FontSize="13" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#14161F, Dark=#E9ECF5}" />
+                <Label Text="Android/data 与 Android/obb 从 Android 11 起禁止第三方应用访问。装上 Shizuku 并授权后，Agate 可以借它的 shell 身份读写这两个目录。"
+                       FontSize="11" TextColor="{AppThemeBinding Light=#9AA1B2, Dark=#4C5468}" />
+                <Label x:Name="ShizukuStatusLabel" Text="正在检测…"
+                       FontSize="12" TextColor="{AppThemeBinding Light=#5F6779, Dark=#8B94A8}" />
+                <Button Text="刷新状态" Clicked="OnRefreshShizukuClicked" Style="{StaticResource CtxButton}" />
+                <Button Text="授权 / 安装 Shizuku" Clicked="OnRequestShizukuClicked" Style="{StaticResource CtxButton}" />
+            </VerticalStackLayout>
+
             <!-- 网络存储 -->
             <VerticalStackLayout Spacing="8">
                 <Label Text="网络存储" FontSize="13" FontAttributes="Bold"

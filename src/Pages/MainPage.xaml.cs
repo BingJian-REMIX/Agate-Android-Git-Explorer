@@ -328,6 +328,21 @@ public partial class MainPage : ContentPage
 
         try
         {
+            var absolutePath = string.IsNullOrEmpty(_relativePath)
+                ? _root
+                : Path.Combine(_root, _relativePath.Replace('/', Path.DirectorySeparatorChar));
+
+            // Android/data、Android/obb 被系统封锁，普通目录 API 一定抛 EACCES。
+            // 有 Shizuku 就走它的 shell 身份列目录，没有则给安装/授权引导。
+            if (ShellAccess.IsRestricted(absolutePath))
+            {
+                if (!await EnsureShellReadyAsync()) return;
+
+                var shellItems = await ListViaShellAsync(absolutePath);
+                ApplyItems(shellItems);
+                return;
+            }
+
             // 仓库根按 Git 视角列（带 M/U/D）；其他路径只按纯文件系统列
             var items = IsGitRepo
                 ? await _git.GetChildrenAsync(_root, _relativePath)
@@ -337,21 +352,7 @@ public partial class MainPage : ContentPage
             if (!_showHidden)
                 items = items.Where(i => !i.Name.StartsWith('.')).ToList();
 
-            // 只有真正换目录/刷新时才播放入场动画；
-            // 滚动复用触发的 Loaded 会在窗口期内被 _animateItems 挡掉，避免来回闪。
-            _animateItems = true;
-
-            Items.Clear();
-            foreach (var item in items) Items.Add(item);
-
-            CurrentPath = _relativePath.Length == 0 ? RootLabel : "/" + _relativePath;
-            OnPropertyChanged(nameof(SelectionSummary));
-
-            _ = Task.Delay(1200).ContinueWith(_ =>
-                MainThread.BeginInvokeOnMainThread(() => _animateItems = false));
-            // 角标只影响一个数字，别让它拖慢目录切换：列表先出来，变更数稍后补上。
-            if (IsGitRepo) _ = RefreshChangeCountAsync();
-            else ChangeCount = 0;
+            ApplyItems(items);
         }
         catch (UnauthorizedAccessException)
         {
@@ -386,6 +387,97 @@ public partial class MainPage : ContentPage
         {
             IsLoading = false;
         }
+    }
+
+    /// <summary>把一批文件项灌进列表并刷新路径/角标。抽出来是为了本地枚举与 shell 枚举共用。</summary>
+    private void ApplyItems(IReadOnlyList<FileItem> items)
+    {
+        // 只有真正换目录/刷新时才播放入场动画；
+        // 滚动复用触发的 Loaded 会在窗口期内被 _animateItems 挡掉，避免来回闪。
+        _animateItems = true;
+
+        Items.Clear();
+        foreach (var item in items) Items.Add(item);
+
+        CurrentPath = _relativePath.Length == 0 ? RootLabel : "/" + _relativePath;
+        OnPropertyChanged(nameof(SelectionSummary));
+
+        _ = Task.Delay(1200).ContinueWith(_ =>
+            MainThread.BeginInvokeOnMainThread(() => _animateItems = false));
+        // 角标只影响一个数字，别让它拖慢目录切换：列表先出来，变更数稍后补上。
+        if (IsGitRepo) _ = RefreshChangeCountAsync();
+        else ChangeCount = 0;
+    }
+
+    /// <summary>通过 Shizuku 的 shell 通道列目录（用于 Android/data、Android/obb）。</summary>
+    private async Task<IReadOnlyList<FileItem>> ListViaShellAsync(string directory)
+    {
+        var (entries, error) = await ShellAccess.ListAsync(directory);
+        if (error.Length > 0)
+        {
+            throw new UnauthorizedAccessException(
+                string.IsNullOrWhiteSpace(error) ? "shell 执行失败" : error);
+        }
+
+        return entries
+            .Where(e => _showHidden || !e.Name.StartsWith('.'))
+            .Select(e => new FileItem
+            {
+                Name = e.Name,
+                FullPath = e.FullPath,
+                IsDirectory = e.IsDirectory,
+                RelativePath = Path.GetRelativePath(_root, e.FullPath).Replace('\\', '/')
+            })
+            .OrderBy(i => !i.IsDirectory)
+            .ThenBy(i => i.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    /// <summary>
+    /// 进入受限目录前的准备：Shizuku 可用直接放行；没装给下载引导；
+    /// 装了但没授权则发起授权请求。任何一步失败都退回上级，避免停在空列表上。
+    /// </summary>
+    private async Task<bool> EnsureShellReadyAsync()
+    {
+        var state = await ShellAccess.GetStateAsync();
+        if (state == ShellState.Ready) return true;
+
+        if (state == ShellState.Unavailable)
+        {
+            var install = await this.SafeConfirmAsync("需要 Shizuku",
+                "Android/data 与 Android/obb 从 Android 11 起禁止第三方应用访问，" +
+                "「所有文件访问」权限也绕不过。\n\n" +
+                "安装 Shizuku 并启动服务后，Agate 可以借它的 shell 身份读写这两个目录。",
+                "了解 Shizuku", "取消");
+
+            if (install)
+            {
+                try { await Launcher.Default.OpenAsync("https://shizuku.rikka.app/"); }
+                catch (Exception ex) { AppLog.Error("shizuku-open-url", ex); }
+            }
+
+            await GoUpAsync();
+            return false;
+        }
+
+        var request = await this.SafeConfirmAsync("Shizuku 未授权",
+            "需要授予 Agate shell 权限才能访问该目录。\n" +
+            "点击「去授权」后，请在 Shizuku 弹出的对话框里选择允许。",
+            "去授权", "取消");
+
+        if (!request)
+        {
+            await GoUpAsync();
+            return false;
+        }
+
+        if (await ShellAccess.RequestPermissionAsync()) return true;
+
+        await this.SafeAlertAsync("未获得授权",
+            "没有拿到 Shizuku 权限，该目录仍然不可访问。\n" +
+            "可以稍后在 Shizuku 应用里为 Agate 手动打开授权。", "好");
+        await GoUpAsync();
+        return false;
     }
 
     /// <summary>列表项入场：从下方 14px 淡入，按索引错开，像文件"掉"进来。</summary>
@@ -463,46 +555,86 @@ public partial class MainPage : ContentPage
                 return;
             }
 
-            // 按扩展名分流：文本进编辑器、图片/ svg 进预览、归档不解压预览、字体/媒体应用内预览、
-            // 未知扩展名或没有扩展名则弹「打开方式」让用户决定。
-            switch (FileKinds.Classify(item.FullPath))
+            // 受系统封锁的目录：先让 shell 把文件复制到本应用可读的位置，再走原有预览路由
+            if (ShellAccess.IsRestricted(item.FullPath))
             {
-                case FileKind.Text:
-                    // .bak 备份文件：点击即弹「打开方式」，让"恢复备份"置顶
-                    if (IsBackup(item.FullPath)) { await ShowOpenWithAsync(item); break; }
-                    await OpenEditorAsync(item);
-                    break;
-
-                case FileKind.Image:
-                    if (FileKinds.IsSvg(item.FullPath))
-                        await Navigation.PushAsync(new SvgPreviewPage(item));
-                    else
-                        await OpenImagePreviewAsync(item);
-                    break;
-
-                case FileKind.Archive:
-                    // 不解压预览：只列举内部目录 / 文件，不往磁盘解压
-                    await Navigation.PushAsync(new ArchivePreviewPage(item));
-                    break;
-
-                case FileKind.Font:
-                    await Navigation.PushAsync(new FontPreviewPage(item));
-                    break;
-
-                case FileKind.Media:
-                    await Navigation.PushAsync(new MediaPage(item));
-                    break;
-
-                default:
-                    await ShowOpenWithAsync(item);
-                    break;
+                await OpenRestrictedFileAsync(item);
+                return;
             }
+
+            await DispatchOpenAsync(item);
         }
         catch (Exception ex)
         {
             AppLog.Error("item-tap", ex);
             await this.SafeAlertAsync("打开失败", ex.Message, "好");
         }
+    }
+
+    /// <summary>
+    /// 按扩展名分流：文本进编辑器、图片/svg 进预览、归档不解压预览、字体/媒体应用内预览、
+    /// 未知扩展名或没有扩展名则弹「打开方式」让用户决定。
+    /// </summary>
+    private async Task DispatchOpenAsync(FileItem item)
+    {
+        switch (FileKinds.Classify(item.FullPath))
+        {
+            case FileKind.Text:
+                // .bak 备份文件：点击即弹「打开方式」，让"恢复备份"置顶
+                if (IsBackup(item.FullPath)) { await ShowOpenWithAsync(item); break; }
+                await OpenEditorAsync(item);
+                break;
+
+            case FileKind.Image:
+                if (FileKinds.IsSvg(item.FullPath))
+                    await Navigation.PushAsync(new SvgPreviewPage(item));
+                else
+                    await OpenImagePreviewAsync(item);
+                break;
+
+            case FileKind.Archive:
+                // 不解压预览：只列举内部目录 / 文件，不往磁盘解压
+                await Navigation.PushAsync(new ArchivePreviewPage(item));
+                break;
+
+            case FileKind.Font:
+                await Navigation.PushAsync(new FontPreviewPage(item));
+                break;
+
+            case FileKind.Media:
+                await Navigation.PushAsync(new MediaPage(item));
+                break;
+
+            default:
+                await ShowOpenWithAsync(item);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 受限目录里的文件无法直接被 .NET 的文件 API 打开，先用 shell 复制到自己可读的
+    /// 外部缓存目录，再拿复制出来的副本走预览。副本仅供查看，改不回原文件。
+    /// </summary>
+    private async Task OpenRestrictedFileAsync(FileItem item)
+    {
+        if (!await EnsureShellReadyAsync()) return;
+
+        var (localPath, error) = await ShellAccess.CopyToLocalAsync(item.FullPath);
+        if (localPath is null)
+        {
+            await this.SafeAlertAsync("无法读取该文件",
+                string.IsNullOrWhiteSpace(error) ? "shell 复制失败" : error, "好");
+            return;
+        }
+
+        var local = new FileItem
+        {
+            Name = item.Name,
+            FullPath = localPath,
+            RelativePath = item.Name,
+            IsDirectory = false
+        };
+        await DispatchOpenAsync(local);
     }
 
     private async Task OpenModifiedFileAsync(FileItem item)
